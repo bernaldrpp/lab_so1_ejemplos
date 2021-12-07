@@ -16,7 +16,7 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Ejemplo creacion de modulo en Linux, Laboratorio Sistemas Operativos 1");
 MODULE_AUTHOR("Bernald Renato Paxtor Peren");
 
-
+//Funcion que se ejecutara cada vez que se lea el archivo con el comando CAT
 static int escribir_archivo(struct seq_file *archivo, void *v)
 {   
 
@@ -30,19 +30,28 @@ static int escribir_archivo(struct seq_file *archivo, void *v)
     return 0;
 }
 
-
+//Funcion que se ejecutara cada vez que se lea el archivo con el comando CAT
 static int al_abrir(struct inode *inode, struct file *file)
 {
     return single_open(file, escribir_archivo, NULL);
 }
 
+//Si el kernel es 5.6 o mayor se usa la estructura proc_ops
 static struct proc_ops operaciones =
 {
     .proc_open = al_abrir,
     .proc_read = seq_read
 };
 
+/*Si el kernel es menor al 5.6 usan file_operations
+static struct file_operations operaciones =
+{
+    .open = al_abrir,
+    .read = seq_read
+};
+*/
 
+//Funcion a ejecuta al insertar el modulo en el kernel con insmod
 static int _insert(void)
 {
     proc_create("ejemplo_modulo", 0, NULL, &operaciones);
@@ -50,6 +59,7 @@ static int _insert(void)
     return 0;
 }
 
+//Funcion a ejecuta al remover el modulo del kernel con rmmod
 static void _remove(void)
 {
     remove_proc_entry("ejemplo_modulo", NULL);
