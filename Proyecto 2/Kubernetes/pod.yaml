@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: mipod
+  name: mipod
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: mipod
