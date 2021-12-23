@@ -56,7 +56,7 @@ kubectl delete services <<Name>>
 kubectl get pods
 ```
 
-## Ejemplo Ngnixs
+## Ejemplo Pods
 ```
 #Nombre del pod: mipod
 #Imagen base (ngnix): --image=nginx
@@ -76,17 +76,85 @@ kubectl expose pod/mipod --target-port=80 --port=80 --type=LoadBalancer --name=m
 Nota: Los loadbalancer son caros
 
 ### NodePort
-Exponer el servicio por un puerto del nodo en donde fue levantado el contenedor
+Exponer el servicio por un puerto del nodo en donde fue levantado el contenedor, en un puerto random de 30000 a 32000 y lo hace publico en todos los nodos del cluster
 ```
 kubectl expose pod/mipod --port=80 --type=NodePort --name=mipod-svc
 #Obtener la ip externa del nodo
 kubectl get nodes -o wide
 ```
 
-### Archivos de configuracion
+### Cluster IP
+Crea un DNS interno para acceder a un deployment o Pod por nombre
 ```
-kubectl get [nodes|services|pods] nombre -o yaml > pod.yaml
+```
+
+## Ejemplo Deployments
+```
+kubectl create deployment app1 --image=nginx
+#Aumentar replicas
+kubectl scale --replicas=3 deployment/app1
+```
+
+### Exponer Deployments
+```
+kubectl expose deployment app1 --port=80 --target-port=80 --type=ClusterIP
+kubectl expose deployment app1 --port=80 --target-port=80 --type=NodePort
+kubectl expose deployment app1 --port=80 --target-port=80 --type=LoadBalancer
+```
+
+## Archivos de configuracion de Kubernetes
+```
+kubectl get [nodes|deployments|services|pods] nombre -o yaml > pod.yaml
 kubectl create -f archivo.yaml
 kubectl delete -f archivo.yaml
 kubectl apply -f archivo.yaml
+```
+
+## Monitoreo
+```
+kubectl logs -f pod/name
+kubectl logs -f deployment/name
+kubectl describe deployments name
+```
+
+## HELM
+El administrador de paquetes de kubernetes
+
+https://helm.sh/docs/intro/install/
+
+```
+#Opcion 1
+wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz
+tar -zxvf helm-v3.7.2-linux-arm64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm
+
+#Opcion 2
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
+## Ingress Controller NGNIX
+
+### Instalar el Ingress
+Agregar el repositorio a HELM
+```
+helm repo add stable https://charts.helm.sh/stable
+kubectl create namespace nginx-ingress
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install nginx-ingress ingress-nginx/ingress-nginx -n nginx-ingress
+#Listar
+helm list -n nginx-ingress
+```
+
+### Configurar el Ingress
+```
+#Agregar record set con la ip del loadbalancer generado por el ingress
+kubectl get all -nnginx-ingress
+
+#Crear un service ClusterIP para el deployoment
+kubectl expose deployment app1 --port=80 --target-port=80 --type=ClusterIP
+
+#Crear la regla de ingress
+kubectl create -f ingress.yaml
 ```

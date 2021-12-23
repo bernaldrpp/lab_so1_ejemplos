@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: load.labso1-vac2021.tk
+      http:
+        paths:
+          - backend:
+              service:
+                name: app1
+                port: 
+                  number: 80
+            path: /
+            pathType: Prefix
