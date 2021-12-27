@@ -1,7 +1,19 @@
 ## GCloud SDK
 ### Instalar
+FROM: https://cloud.google.com/sdk/docs/quickstart#deb
+### Metodo 1
 ```
-[//]: # FROM: https://cloud.google.com/sdk/docs/quickstart#deb
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
+
+tar zxvf google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
+
+./google-cloud-sdk/install.sh
+
+#reiniciar consola
+```
+
+### Metodo 2
+```
 sudo apt-get install apt-transport-https ca-certificates gnupg
 
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
@@ -23,6 +35,11 @@ gcloud config set compute/zone us-central1-a
 ```
 ## Instalar Kubectl
 ```
+#Si el SDK fue instalado con el metodo 1
+gcloud components install kubectl
+
+
+#Si el SDK fue instalado con el metodo 2
 sudo apt-get install kubectl
 ```
 ## Creacion de cluster de kubernetes
@@ -35,7 +52,7 @@ sudo apt-get install kubectl
 #Autenticacion con certificado: --enable-legacy-authorization --issue-client-certificate
 #Habilitar el escalado automatico (Minimo de nodos 1 y maximo 3): --enable-autoscaling --min-nodes=1 --max-nodes=3
 
-gcloud container clusters create k8s-demo --num-nodes=1 --tags=allin,allout --enable-legacy-authorization --issue-client-certificate --machine-type=n1-standard-2
+gcloud container clusters create k8s-demo --num-nodes=1 --tags=allin,allout --enable-legacy-authorization --issue-client-certificate --preemptible --machine-type=n1-standard-2
 ```
 ## Obtener credenciales para Kubectl
 ```
@@ -143,6 +160,8 @@ kubectl create namespace nginx-ingress
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 helm install nginx-ingress ingress-nginx/ingress-nginx -n nginx-ingress
+
+
 #Listar
 helm list -n nginx-ingress
 ```
@@ -150,7 +169,7 @@ helm list -n nginx-ingress
 ### Configurar el Ingress
 ```
 #Agregar record set con la ip del loadbalancer generado por el ingress
-kubectl get all -nnginx-ingress
+kubectl get all -n nginx-ingress
 
 #Crear un service ClusterIP para el deployoment
 kubectl expose deployment app1 --port=80 --target-port=80 --type=ClusterIP

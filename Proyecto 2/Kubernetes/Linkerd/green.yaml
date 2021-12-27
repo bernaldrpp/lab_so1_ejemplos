@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: green
+  name: green
+  namespace: minamespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: green
+  template:
+    metadata:
+      labels:
+        app: green
+    spec:
+      containers:
+      - image: bernaldrpp/green
+        imagePullPolicy: Always
+        name: green
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: green
+  name: green
+  namespace: minamespace
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: green
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: green-ingress
+  namespace: minamespace
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+      grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: green.labso1-vac2021.tk
+      http:
+        paths:
+          - backend:
+              service:
+                name: green
+                port: 
+                  number: 8080
+            path: /
+            pathType: Prefix

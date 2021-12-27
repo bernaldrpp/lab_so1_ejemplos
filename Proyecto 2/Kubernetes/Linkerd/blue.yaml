@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: blue
+  name: blue
+  namespace: minamespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blue
+  template:
+    metadata:
+      labels:
+        app: blue
+    spec:
+      containers:
+      - image: bernaldrpp/blue
+        imagePullPolicy: Always
+        name: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: blue
+  name: blue
+  namespace: minamespace
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: blue
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blue-ingress
+  namespace: minamespace
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+      grpc_set_header l5d-dst-override $service_name.$namespace.svc.cluster.local:$service_port;
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: blue.labso1-vac2021.tk
+      http:
+        paths:
+          - backend:
+              service:
+                name: blue
+                port: 
+                  number: 8080
+            path: /
+            pathType: Prefix
