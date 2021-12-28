@@ -1,4 +1,5 @@
-## Instalar LINKERD
+# Linkerd
+## Instalar
 
 ```
 #FROM: https://linkerd.io/2.11/getting-started/
@@ -12,10 +13,13 @@ linkerd check --pre
 linkerd install | kubectl apply -f -
 ```
 
+## Instalar el Dashboard
+```
+ linkerd viz install | kubectl apply -f -
+```
+
 ## Instalar el Ingress Controller
-```
-helm install nginx-ingress ingress-nginx/ingress-nginx -n nginx-ingress
-```
+Ver instrucciones en la seccion de Kubernetes
 
 ## Injecatar Linkerd en el Ingress controller
 ```
@@ -36,4 +40,9 @@ kubectl create -f traffic-splitter.yaml
 ## Injectar Linkerd en los Deployments
 ```
 kubectl -n minamespace get deploy -o yaml | linkerd inject - | kubectl apply -f -
+```
+
+## Ver el Dashboard
+```
+linkerd viz dashboard
 ```
